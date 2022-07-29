@@ -1,5 +1,5 @@
 function Balances() {
-    return 'b'
+    return 'c'
 }
 
 export default Balances;
