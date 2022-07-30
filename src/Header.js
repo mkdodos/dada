@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, Icon } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 function Header() {
-  const [activeItem, setActiveItem] = React.useState("post");
+  const [activeItem, setActiveItem] = React.useState("");
   function handleClick(e, { name }) {
     setActiveItem(name);
   }

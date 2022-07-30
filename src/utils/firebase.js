@@ -19,4 +19,5 @@ const firebaseConfig = {
     // console.log(data)
   })
 
+  export default firebase
   export {db}
