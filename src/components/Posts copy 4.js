@@ -12,7 +12,6 @@ import {
   Button,
   Table,
   Header,
-  Statistic,
 } from "semantic-ui-react";
 function Posts() {
   const rows = [
@@ -56,14 +55,6 @@ function Posts() {
         <Grid columns="equal">
           <Grid.Row>
             <Grid.Column>
-              <Statistic horizontal>
-                <Statistic.Value>5,550</Statistic.Value>
-                <Statistic.Label>玉山</Statistic.Label>
-              </Statistic>
-            </Grid.Column>
-           
-            <Grid.Column verticalAlign="middle">
-              
               <Button floated="right" color="blue" onClick={saveRow}>
                 <Icon name="plus" /> Create
               </Button>
@@ -74,12 +65,15 @@ function Posts() {
             <Grid.Column>
               {posts.map((row, i) => {
                 return (
-                  <Table key={i} unstackable>
+                  <Table
+                    key={i}
+                    unstackable
+                    color={row.income ? "teal" : "orange"}
+                  >
                     <Table.Body>
                       <Table.Row>
                         <Table.Cell>
                           <Header as="h4">{row.title}</Header>
-                          {row.date}
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (
@@ -91,7 +85,32 @@ function Posts() {
                               提
                             </Label>
                           )}
-                          <br></br>${row.income ? row.income : row.expense + ""}
+                        </Table.Cell>
+                      </Table.Row>
+                      <Table.Row>
+                        <Table.Cell>{row.date}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {row.income ? row.income : row.expense}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Header as="h4">{row.title}</Header>
+                        </Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {row.income ? (
+                            <Label color="teal" circular>
+                              存
+                            </Label>
+                          ) : (
+                            <Label color="orange" circular>
+                              提
+                            </Label>
+                          )}
+                        </Table.Cell>
+                      </Table.Row>
+                      <Table.Row>
+                        <Table.Cell>{row.date}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                          {row.income ? row.income : row.expense}
                         </Table.Cell>
                       </Table.Row>
                     </Table.Body>
