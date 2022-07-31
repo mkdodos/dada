@@ -8,22 +8,27 @@ import {
   Icon,
   Modal,
   Form,
+  Dropdown,
 } from "semantic-ui-react";
 import firebase, { db } from "../utils/firebase";
 export default function GridEqualColumns() {
+  // 編輯視窗顯示控制
   const [open, setOpen] = React.useState(false);
+  
+  // 資料欄位
+  //  { name: "土地銀行1", balance: "908", prior: "1" },
   const [docID, setDocID] = React.useState("");
   const [name, setName] = React.useState("");
   const [balance, setBalance] = React.useState("");
+  const [prior, setPrior] = React.useState("");
+  
+  // 區塊顯示
   const [gridRows, setGridRows] = React.useState([]);
 
   React.useEffect(() => {
-    // const rows = [
-    //     { name: "土地銀行1", balance: "908", date: "2022-10-22" },
-    //
-    //   ];
+   
     db.collection("topics")
-      .orderBy("createdAt", "desc")
+      .orderBy("prior")
       .onSnapshot((snapshot) => {
         const rows = snapshot.docs.map((doc) => {
           return { ...doc.data(), id: doc.id };
@@ -76,6 +81,7 @@ export default function GridEqualColumns() {
                   setOpen(true);
                   setDocID(row.id);
                   setName(row.name);
+                  setPrior(row.prior)
                   setBalance(row.balance);
                 }}
               >
@@ -103,16 +109,19 @@ export default function GridEqualColumns() {
   }, []);
 
   function saveRow() {
+    
     if (docID) {
       db.collection("topics").doc(docID).update({
         name: name,
         balance: balance,
+        prior: prior,
         updatedAt: firebase.firestore.Timestamp.now(),
       });
     } else {
       db.collection("topics").add({
         name: name,
-        balance: balance,
+        balance: balance,    
+        prior,    
         createdAt: firebase.firestore.Timestamp.now(),
       });
     }
@@ -135,15 +144,34 @@ export default function GridEqualColumns() {
     setOpen(false);
     setName("");
     setBalance("");
+    setPrior("")
   }
 
   // 數字格式  2,500
-  function numberFormat(total){
-    var formatter = new Intl.NumberFormat("en-US", {     
-      currency: "USD"
-    });  
-    return formatter.format(total);     
+  function numberFormat(total) {
+    var formatter = new Intl.NumberFormat("en-US", {
+      currency: "USD",
+    });
+    return formatter.format(total);
   }
+
+  const friendOptions = [
+    {
+      key: "1",
+      text: "1",
+      value: "1",
+    },
+    {
+      key: "2",
+      text: "2",
+      value: "2",
+    },
+    {
+      key: "3",
+      text: "3",
+      value: "3",
+    },
+  ];
 
   return (
     <>
@@ -156,6 +184,7 @@ export default function GridEqualColumns() {
         open={open}
         onClose={() => {
           setOpen(false);
+          setDefalut()
         }}
       >
         <Header>編輯帳戶</Header>
@@ -182,7 +211,18 @@ export default function GridEqualColumns() {
                 placeholder="please enter your amount"
               />
             </Form.Field>
-            
+            <Form.Field>
+              <label>順位</label>
+              <Dropdown
+                selection
+                value={prior}
+                placeholder="順位"
+                options={friendOptions}
+                onChange={(e,obj) => {
+                  setPrior(obj.value)                  
+                }}
+              ></Dropdown>
+            </Form.Field>
           </Form>
         </Modal.Content>
         <Modal.Actions>
