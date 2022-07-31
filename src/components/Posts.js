@@ -31,7 +31,7 @@ function Posts() {
   const [title, setTitle] = React.useState("");
   const [income, setIncome] = React.useState("");
 
-  const [isIncome, setIsIncome] = React.useState("");
+  const [isIncome, setIsIncome] = React.useState("income");
 
   const [activeItem, setActiveItem] = React.useState("");
   const [activeBalance, setActiveBalance] = React.useState(0);
@@ -122,7 +122,7 @@ function Posts() {
             <Menu fluid widths={2} pointing secondary  >
               <Menu.Item 
               color='teal'
-              inverted
+              
                 name="income"
                 active={isIncome === "income"}
                 onClick={handleItemClick}
@@ -158,10 +158,11 @@ function Posts() {
             </Form>
           </Modal.Content>
           <Modal.Actions>
-            <Button color="red" floated="left" onClick={deleteRow}>
+            {docID && <Button color="red" floated="left" onClick={deleteRow}>
               <Icon name="remove" />
               Delete
-            </Button>
+            </Button>}
+            
             <Button color="green" onClick={saveRow}>
               <Icon name="check" />
               Save
@@ -204,6 +205,7 @@ function Posts() {
                   color="blue"
                   onClick={() => {
                     setOpen(true);
+                    // setIsIncome('income')
                   }}
                 >
                   <Icon name="plus" /> Create
