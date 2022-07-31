@@ -11,6 +11,8 @@ import {
   Dropdown,
 } from "semantic-ui-react";
 import firebase, { db } from "../utils/firebase";
+import { numFormat } from "../utils/stringFormat";
+
 export default function GridEqualColumns() {
   // 編輯視窗顯示控制
   const [open, setOpen] = React.useState(false);
@@ -88,7 +90,7 @@ export default function GridEqualColumns() {
                 <Label color="teal" attached="top">
                   {row.name}
                 </Label>
-                <Header>{numberFormat(row.balance)}</Header>
+                <Header>{numFormat(row.balance)}</Header>
               </Segment>
             </Grid.Column>
           );
@@ -148,12 +150,12 @@ export default function GridEqualColumns() {
   }
 
   // 數字格式  2,500
-  function numberFormat(total) {
-    var formatter = new Intl.NumberFormat("en-US", {
-      currency: "USD",
-    });
-    return formatter.format(total);
-  }
+  // function numberFormat(total) {
+  //   var formatter = new Intl.NumberFormat("en-US", {
+  //     currency: "USD",
+  //   });
+  //   return formatter.format(total);
+  // }
 
   const friendOptions = [
     {
@@ -170,6 +172,11 @@ export default function GridEqualColumns() {
       key: "3",
       text: "3",
       value: "3",
+    },
+    {
+      key: "4",
+      text: "4",
+      value: "4",
     },
   ];
 

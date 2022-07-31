@@ -22,14 +22,20 @@ function Posts() {
     { name: "中國信託", amt: "908", date: "2022-10-22" },
   ];
 
-  // const posts = [
-  //   { name: "現金股息", income: "678", date: "2022-09-01" },
-  //   { name: "信用卡", amt: "4,567", date: "2022-01-08" },
-  //   { name: "玉山", amt: "908", date: "2022-10-22" },
-  //   { name: "薪資", income: "50975", date: "2022-10-05" },
-  // ];
+  const [activeItem, setActiveItem] = React.useState("");
   const [posts, setPosts] = React.useState([]);
+  const [topAccounts, setTopAccounts] = React.useState([]);
   React.useEffect(() => {
+    db.collection("topics")
+      .where("prior", "<=", "3")
+      .get()
+      .then((snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          return doc.data();
+        });
+        setTopAccounts(data);
+        console.log(data);
+      });
     db.collection("posts")
       .get()
       .then((snapshot) => {
@@ -55,20 +61,56 @@ function Posts() {
       <Container>
         <Grid columns="equal">
           <Grid.Row>
+            {topAccounts.map((row,i) => {
+              return <Grid.Column key={i}>
+                <Segment textAlign="center"
+                  onClick={() => {
+                    setActiveItem(row.name);
+                  }}
+                  color={activeItem === row.name ? "teal" : "grey"}
+                >
+                  {row.name}
+                </Segment>
+              </Grid.Column>;
+            })}
+
+            {/* <Grid.Column>
+              <Segment
+                onClick={() => {
+                  setActiveItem("b");
+                }}
+                color={activeItem === "b" ? "teal" : "grey"}
+              >
+                a
+              </Segment>
+            </Grid.Column>
             <Grid.Column>
-              <Statistic horizontal>
-                <Statistic.Value>5,550</Statistic.Value>
-                <Statistic.Label>玉山</Statistic.Label>
-              </Statistic>
-            </Grid.Column>
-           
-            <Grid.Column verticalAlign="middle">
-              
-              <Button floated="right" color="blue" onClick={saveRow}>
-                <Icon name="plus" /> Create
-              </Button>
-            </Grid.Column>
+              <Segment
+                onClick={() => {
+                  setActiveItem("c");
+                }}
+                color={activeItem === "c" ? "teal" : "grey"}
+              >
+                a
+              </Segment>
+            </Grid.Column> */}
           </Grid.Row>
+          {activeItem && (
+            <Grid.Row>
+              <Grid.Column>
+                <Statistic horizontal>
+                  <Statistic.Value>5,550</Statistic.Value>
+                  <Statistic.Label>玉山</Statistic.Label>
+                </Statistic>
+              </Grid.Column>
+
+              <Grid.Column verticalAlign="middle">
+                <Button floated="right" color="blue" onClick={saveRow}>
+                  <Icon name="plus" /> Create
+                </Button>
+              </Grid.Column>
+            </Grid.Row>
+          )}
 
           <Grid.Row>
             <Grid.Column>
