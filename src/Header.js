@@ -7,7 +7,7 @@ function Header() {
     setActiveItem(name);
   }
   return (
-    <Menu secondary pointing widths={4}>
+    <Menu secondary  pointing widths={4} >
       <Menu.Item
         as={Link}
         to="/topics"
@@ -34,6 +34,7 @@ function Header() {
       >
         設定
       </Menu.Item>
+     
       <Menu.Menu position="right">
         <Menu.Item name="logout" />
       </Menu.Menu>

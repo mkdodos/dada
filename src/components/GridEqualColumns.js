@@ -16,19 +16,18 @@ import { numFormat } from "../utils/stringFormat";
 export default function GridEqualColumns() {
   // 編輯視窗顯示控制
   const [open, setOpen] = React.useState(false);
-  
+
   // 資料欄位
   //  { name: "土地銀行1", balance: "908", prior: "1" },
   const [docID, setDocID] = React.useState("");
   const [name, setName] = React.useState("");
   const [balance, setBalance] = React.useState("");
   const [prior, setPrior] = React.useState("");
-  
+
   // 區塊顯示
   const [gridRows, setGridRows] = React.useState([]);
 
   React.useEffect(() => {
-   
     db.collection("topics")
       .orderBy("prior")
       .onSnapshot((snapshot) => {
@@ -83,7 +82,7 @@ export default function GridEqualColumns() {
                   setOpen(true);
                   setDocID(row.id);
                   setName(row.name);
-                  setPrior(row.prior)
+                  setPrior(row.prior);
                   setBalance(row.balance);
                 }}
               >
@@ -111,7 +110,6 @@ export default function GridEqualColumns() {
   }, []);
 
   function saveRow() {
-    
     if (docID) {
       db.collection("topics").doc(docID).update({
         name: name,
@@ -122,8 +120,8 @@ export default function GridEqualColumns() {
     } else {
       db.collection("topics").add({
         name: name,
-        balance: balance,    
-        prior,    
+        balance: balance,
+        prior,
         createdAt: firebase.firestore.Timestamp.now(),
       });
     }
@@ -146,7 +144,7 @@ export default function GridEqualColumns() {
     setOpen(false);
     setName("");
     setBalance("");
-    setPrior("")
+    setPrior("");
   }
 
   // 數字格式  2,500
@@ -191,7 +189,7 @@ export default function GridEqualColumns() {
         open={open}
         onClose={() => {
           setOpen(false);
-          setDefalut()
+          setDefalut();
         }}
       >
         <Header>編輯帳戶</Header>
@@ -225,8 +223,8 @@ export default function GridEqualColumns() {
                 value={prior}
                 placeholder="順位"
                 options={friendOptions}
-                onChange={(e,obj) => {
-                  setPrior(obj.value)                  
+                onChange={(e, obj) => {
+                  setPrior(obj.value);
                 }}
               ></Dropdown>
             </Form.Field>
