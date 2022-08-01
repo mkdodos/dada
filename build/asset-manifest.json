@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.js": "/dada/build/static/js/main.37e89c4b.chunk.js",
+    "main.js.map": "/dada/build/static/js/main.37e89c4b.chunk.js.map",
+    "runtime-main.js": "/dada/build/static/js/runtime-main.96041442.js",
+    "runtime-main.js.map": "/dada/build/static/js/runtime-main.96041442.js.map",
+    "static/css/2.3cf23766.chunk.css": "/dada/build/static/css/2.3cf23766.chunk.css",
+    "static/js/2.2e0bc571.chunk.js": "/dada/build/static/js/2.2e0bc571.chunk.js",
+    "static/js/2.2e0bc571.chunk.js.map": "/dada/build/static/js/2.2e0bc571.chunk.js.map",
+    "index.html": "/dada/build/index.html",
+    "static/css/2.3cf23766.chunk.css.map": "/dada/build/static/css/2.3cf23766.chunk.css.map",
+    "static/js/2.2e0bc571.chunk.js.LICENSE.txt": "/dada/build/static/js/2.2e0bc571.chunk.js.LICENSE.txt",
+    "static/media/semantic.min.css": "/dada/build/static/media/outline-icons.ddae9b1b.woff"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.96041442.js",
+    "static/css/2.3cf23766.chunk.css",
+    "static/js/2.2e0bc571.chunk.js",
+    "static/js/main.37e89c4b.chunk.js"
+  ]
+}
