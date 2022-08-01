@@ -11,7 +11,7 @@ import {
 import Posts from "./components/Posts";
 import Balances from "./components/Balances";
 import Login from "./components/Login";
-
+import User from "./components/User";
 function App() {
   return (
     <>
@@ -21,6 +21,7 @@ function App() {
           <Route path="/accounts" component={Accounts}></Route>
           <Route path="/balances" component={Balances}></Route>
           <Route path="/login" component={Login}></Route>
+          <Route path="/user" component={User}></Route>
           <Route path="/posts" component={Posts}></Route>
         </Switch>
       </BrowserRouter>

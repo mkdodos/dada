@@ -1,7 +1,8 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
+import "firebase/auth"
 const firebaseConfig = {
-    apiKey: "AIzaSyBKVsNm8RP9VKYBgEwmyRQsitx9dncLuaI",
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
     authDomain: "social-cool-f16ba.firebaseapp.com",
     projectId: "social-cool-f16ba",
     storageBucket: "social-cool-f16ba.appspot.com",
@@ -9,15 +10,10 @@ const firebaseConfig = {
     appId: "1:578558980743:web:4668ba80e8df3c24087e22"
   };
 
- firebase.initializeApp(firebaseConfig)
+ const app = firebase.initializeApp(firebaseConfig)
   const db = firebase.firestore()
 
-  const col = db.collection('topics').get().then((snapshot)=>{
-    const data = snapshot.docs.map(doc=>{
-        return doc.data()
-    })
-    // console.log(data)
-  })
+ const auth = app.auth()
 
   export default firebase
-  export {db}
+  export {db,auth}

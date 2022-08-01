@@ -9,12 +9,15 @@ import {
   Modal,
   Form,
   Dropdown,
-  Container
+  Container,
 } from "semantic-ui-react";
 import firebase, { db } from "../utils/firebase";
 import { numFormat } from "../utils/stringFormat";
+import { useHistory } from "react-router-dom";
+import { auth } from "../utils/firebase";
 
 export default function Accounts() {
+  const user = auth.currentUser;
   // 編輯視窗顯示控制
   const [open, setOpen] = React.useState(false);
 
@@ -29,18 +32,39 @@ export default function Accounts() {
   const [gridRows, setGridRows] = React.useState([]);
 
   React.useEffect(() => {
-    db.collection("accounts")
-      .orderBy("prior")
-      .onSnapshot((snapshot) => {
-        const rows = snapshot.docs.map((doc) => {
-          return { ...doc.data(), id: doc.id };
-        });
+    let col = db.collection("accounts");
+    // col.orderBy("prior");
+    if (user) col = col.where("user", "==", user.email);
+    // col=col.where("name","==","晚")
+    col = col.onSnapshot((snapshot) => {
+      const rows = snapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
+      });
 
-        const grid = [];
-        let i = 0;
-        let columns = [];
-        // 沒有資料時,顯示新增鈕
-        if (rows.length == 0) {
+      const grid = [];
+      let i = 0;
+      let columns = [];
+      // 沒有資料時,顯示新增鈕
+      if (rows.length == 0) {
+        columns.push(
+          <Grid.Column key="0">
+            <Segment
+              textAlign="center"
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              <Label attached="top">新增</Label>
+
+              <Header>+</Header>
+            </Segment>
+          </Grid.Column>
+        );
+        grid.push(<Grid.Row key={i}>{columns}</Grid.Row>);
+      }
+      for (let row of rows) {
+        // 資料區塊最前面放置新增鈕
+        if (i == 0) {
           columns.push(
             <Grid.Column key="0">
               <Segment
@@ -50,81 +74,59 @@ export default function Accounts() {
                 }}
               >
                 <Label attached="top">新增</Label>
-
                 <Header>+</Header>
               </Segment>
             </Grid.Column>
           );
+        }
+        // 資料區塊
+        columns.push(
+          <Grid.Column key={i + 1}>
+            <Segment
+              textAlign="center"
+              onClick={() => {
+                setOpen(true);
+                setDocID(row.id);
+                setName(row.name);
+                setPrior(row.prior);
+                setBalance(row.balance);
+              }}
+            >
+              <Label color="teal" attached="top">
+                {row.name}
+              </Label>
+              <Header>{numFormat(row.balance)}</Header>
+            </Segment>
+          </Grid.Column>
+        );
+        // 每列3筆區塊
+        // i = 1,4,7... 或最後一筆時加入一列
+        // + 0 1
+        // 2 3 4
+        // 5 6
+        if (i % 3 == 1 || i == rows.length - 1) {
           grid.push(<Grid.Row key={i}>{columns}</Grid.Row>);
+          columns = [];
         }
-        for (let row of rows) {
-          // 資料區塊最前面放置新增鈕
-          if (i == 0) {
-            columns.push(
-              <Grid.Column key="0">
-                <Segment
-                  textAlign="center"
-                  onClick={() => {
-                    setOpen(true);
-                  }}
-                >
-                  <Label attached="top">新增</Label>
-                  <Header>+</Header>
-                </Segment>
-              </Grid.Column>
-            );
-          }
-          // 資料區塊
-          columns.push(
-            <Grid.Column key={i + 1}>
-              <Segment
-                textAlign="center"
-                onClick={() => {
-                  setOpen(true);
-                  setDocID(row.id);
-                  setName(row.name);
-                  setPrior(row.prior);
-                  setBalance(row.balance);
-                }}
-              >
-                <Label color="teal" attached="top">
-                  {row.name}
-                </Label>
-                <Header>{numFormat(row.balance)}</Header>
-              </Segment>
-            </Grid.Column>
-          );
-          // 每列3筆區塊
-          // i = 1,4,7... 或最後一筆時加入一列
-          // + 0 1
-          // 2 3 4
-          // 5 6
-          if (i % 3 == 1 || i == rows.length - 1) {
-            grid.push(<Grid.Row key={i}>{columns}</Grid.Row>);
-            columns = [];
-          }
 
-          i++;
-        }
-        setGridRows(grid);
-      });
+        i++;
+      }
+      setGridRows(grid);
+    });
   }, []);
 
   function saveRow() {
+    const row = {
+      name: name,
+      balance: balance,
+      prior,
+      user: user.email,
+      createdAt: firebase.firestore.Timestamp.now(),
+    }
     if (docID) {
-      db.collection("accounts").doc(docID).update({
-        name: name,
-        balance: balance,
-        prior: prior,
-        updatedAt: firebase.firestore.Timestamp.now(),
-      });
+      db.collection("accounts").doc(docID).update(row);
     } else {
-      db.collection("accounts").add({
-        name: name,
-        balance: balance,
-        prior,
-        createdAt: firebase.firestore.Timestamp.now(),
-      });
+      db.collection("accounts").add(row);
     }
 
     setDefalut();
@@ -147,8 +149,6 @@ export default function Accounts() {
     setBalance("");
     setPrior("");
   }
-
-  
 
   const friendOptions = [
     {
@@ -175,68 +175,69 @@ export default function Accounts() {
 
   return (
     <>
-     <Container>
-      <div className="App">
-        <Grid columns={3}>{gridRows}</Grid>
-      </div>
+      <Container>
+        {user && user.email}
+        <div className="App">
+          <Grid columns={3}>{gridRows}</Grid>
+        </div>
 
-      <Modal
-        closeIcon
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          setDefalut();
-        }}
-      >
-        <Header>編輯帳戶</Header>
-        <Modal.Content>
-          <Form size="large">
-            <Form.Field>
-              <label>帳戶名稱</label>
-              <input
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                }}
-                placeholder="please enter your name"
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>餘額</label>
-              <input
-                type="number"
-                value={balance}
-                onChange={(e) => {
-                  setBalance(e.target.value);
-                }}
-                placeholder="please enter your amount"
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>順位</label>
-              <Dropdown
-                selection
-                value={prior}
-                placeholder="順位"
-                options={friendOptions}
-                onChange={(e, obj) => {
-                  setPrior(obj.value);
-                }}
-              ></Dropdown>
-            </Form.Field>
-          </Form>
-        </Modal.Content>
-        <Modal.Actions>
-          <Button color="red" floated="left" onClick={deleteRow}>
-            <Icon name="remove" />
-            Delete
-          </Button>
-          <Button color="green" onClick={saveRow}>
-            <Icon name="check" />
-            Save
-          </Button>
-        </Modal.Actions>
-      </Modal>
+        <Modal
+          closeIcon
+          open={open}
+          onClose={() => {
+            setOpen(false);
+            setDefalut();
+          }}
+        >
+          <Header>編輯帳戶</Header>
+          <Modal.Content>
+            <Form size="large">
+              <Form.Field>
+                <label>帳戶名稱</label>
+                <input
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                  placeholder="please enter your name"
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>餘額</label>
+                <input
+                  type="number"
+                  value={balance}
+                  onChange={(e) => {
+                    setBalance(e.target.value);
+                  }}
+                  placeholder="please enter your amount"
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>順位</label>
+                <Dropdown
+                  selection
+                  value={prior}
+                  placeholder="順位"
+                  options={friendOptions}
+                  onChange={(e, obj) => {
+                    setPrior(obj.value);
+                  }}
+                ></Dropdown>
+              </Form.Field>
+            </Form>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button color="red" floated="left" onClick={deleteRow}>
+              <Icon name="remove" />
+              Delete
+            </Button>
+            <Button color="green" onClick={saveRow}>
+              <Icon name="check" />
+              Save
+            </Button>
+          </Modal.Actions>
+        </Modal>
       </Container>
     </>
   );

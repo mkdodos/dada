@@ -1,8 +1,19 @@
 import React from "react";
 import { Menu, Icon } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import { auth } from "./utils/firebase";
+import { useHistory } from "react-router-dom";
 function Header() {
+  // const user = auth.currentUser;
+  const history = useHistory();
   const [activeItem, setActiveItem] = React.useState("");
+  const [user, setUser] = React.useState(null);
+  React.useEffect(() => {
+    auth.onAuthStateChanged((currUser) => {
+      setUser(currUser);
+    });
+  }, []);
+
   function handleClick(e, { name }) {
     setActiveItem(name);
   }
@@ -27,27 +38,28 @@ function Header() {
       >
         收支
       </Menu.Item>
-      {/* <Menu.Item
-        as={Link}
-        to="/posts"
-        name="posts"
-        onClick={handleClick}
-        active={activeItem === "posts"}
-      >
-        Posts
-      </Menu.Item> */}
-      <Menu.Item
-        name="login"
-        as={Link}
-        to="/login"
-        onClick={handleClick}
-        active={activeItem === "login"}
-      >
-        Login
-      </Menu.Item>
 
       <Menu.Menu position="right">
-        <Menu.Item name="logout" />
+        {user ? (
+          <Menu.Item
+            name="logout"
+            onClick={() => {
+              auth.signOut().then(() => {
+                history.push("/login");
+              });
+            }}
+          />
+        ) : (
+          <Menu.Item
+            name="login"
+            as={Link}
+            to="/login"
+            onClick={handleClick}
+           
+          >
+            Login
+          </Menu.Item>
+        )}
       </Menu.Menu>
     </Menu>
   );
