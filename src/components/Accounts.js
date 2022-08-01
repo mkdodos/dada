@@ -9,6 +9,7 @@ import {
   Modal,
   Form,
   Dropdown,
+  Container
 } from "semantic-ui-react";
 import firebase, { db } from "../utils/firebase";
 import { numFormat } from "../utils/stringFormat";
@@ -174,6 +175,7 @@ export default function Accounts() {
 
   return (
     <>
+     <Container>
       <div className="App">
         <Grid columns={3}>{gridRows}</Grid>
       </div>
@@ -235,6 +237,7 @@ export default function Accounts() {
           </Button>
         </Modal.Actions>
       </Modal>
+      </Container>
     </>
   );
 }

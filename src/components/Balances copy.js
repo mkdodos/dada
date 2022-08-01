@@ -25,7 +25,6 @@ function Balances() {
   const [docID, setDocID] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [income, setIncome] = React.useState("");
-  const [account, setAccount] = React.useState();
   const [date, setDate] = React.useState(new Date().toISOString().slice(0, 10));
   // 收支判斷
   const [isIncome, setIsIncome] = React.useState("income");
@@ -46,25 +45,57 @@ function Balances() {
           return { ...doc.data(), id: doc.id };
         });
         setTopAccounts(data);
-        console.log(topAccounts);
+        console.log(topAccounts)
       });
     // 收支資料
     if (activeAccount) {
-      db.collection("balances")
-        .where("account.id", "==", activeAccount.id)
-        .onSnapshot((snapshot) => {
-          const data = snapshot.docs.map((doc) => {
-            return { ...doc.data(), id: doc.id };
+      // db.collection("accounts")
+      //   .doc(activeAccount.id)
+      //   .collection("balances")
+      //   .onSnapshot((snapshot) => {
+      //     const data = snapshot.docs.map((doc) => {
+      //       return { ...doc.data(), id: doc.id };
+      //     });
+       
+      //     setBalances([...balances,...data]);
+      //   });
+      // if (activeAccount) {
+        db.collection("balances")
+          .where("account.id", "==", activeAccount.id)
+          .onSnapshot((snapshot) => {
+            const data = snapshot.docs.map((doc) => {
+              return { ...doc.data(), id: doc.id };
+            });
+            setBalances(data);
           });
-          setBalances(data);
-        });
     } else {
-      db.collection("balances").onSnapshot((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          return { ...doc.data(), id: doc.id };
+      db.collection("accounts")
+        .get()
+        .then((snapshot) => {
+          let temp = [];
+        //   const rows = []
+          snapshot.docs.map((doc) => {
+            // return doc.data()
+           
+            db.collection("accounts")
+              .doc(doc.id)
+              .collection("balances")
+              .get()
+              .then((snapshot2) => {
+                const data = snapshot2.docs.map((bb) => {
+                  return {...bb.data(),id:bb.id};
+                });
+               
+                let rows = [{title: '5', income: '6', date: '2022-07-31'}]
+               
+                // rows.push(row)
+                setBalances([...data,...rows])
+                // setBalances([...balances, ...data])
+
+               console.log(data)
+              });
+          });
         });
-        setBalances(data);
-      });
     }
   }, [activeAccount]);
 
@@ -78,10 +109,6 @@ function Balances() {
     } else {
       row.expense = income;
     }
-    if (account) {
-      row.account = account;
-    }
-
     if (activeAccount) {
       row.account = activeAccount;
     }
@@ -94,23 +121,40 @@ function Balances() {
           setDefalut();
         });
     } else {
-      db.collection("balances")
-        .add(row)
-        .then(() => {
-          setDefalut();
-        });
+      // db.collection("accounts")
+      //   .doc(activeAccount.id)
+      //   .collection("balances")
+      //   .add(row)
+      //   .then(() => {
+      //     setDefalut();
+      //   });
+
+        db.collection("balances")
+          .add(row)
+          .then(() => {
+            setDefalut();
+          });
     }
   }
 
   function deleteRow() {
     if (docID) {
-      db.collection("balances")
+      db.collection("accounts")
+        .doc(activeAccount.id)
+        .collection("balances")
         .doc(docID)
         .delete()
         .then(() => {
           console.log("add");
           setDefalut();
         });
+      //   db.collection("balances")
+      //     .doc(docID)
+      //     .delete()
+      //     .then(() => {
+      //       console.log("add");
+      //       setDefalut();
+      //     });
     }
   }
 
@@ -262,8 +306,6 @@ function Balances() {
                           setDocID(row.id);
                           setTitle(row.title);
                           setDate(row.date);
-                          setAccount(row.account);
-
                           if (row.income) {
                             setIsIncome("income");
                             setIncome(row.income);
@@ -275,9 +317,7 @@ function Balances() {
                       >
                         <Table.Cell>
                           <Header as="h4">{row.title}</Header>
-                          <span>{row.date} </span>
-                        {!activeAccount && <Label>{row.account && row.account.name}</Label> }  
-                         
+                          {row.date}
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (
@@ -289,8 +329,8 @@ function Balances() {
                               提
                             </Label>
                           )}
-                          <br></br>
-                          $ {row.income ? numFormat(row.income) : numFormat(row.expense) + ""}
+                          <br></br>${" "}
+                          {row.income ? row.income : row.expense + ""}
                         </Table.Cell>
                       </Table.Row>
                     </Table.Body>
