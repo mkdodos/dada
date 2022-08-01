@@ -37,11 +37,13 @@ function Header() {
         Posts
       </Menu.Item> */}
       <Menu.Item
-        name="settings"
+        name="login"
+        as={Link}
+        to="/login"
         onClick={handleClick}
-        active={activeItem === "settings"}
+        active={activeItem === "login"}
       >
-        設定
+        Login
       </Menu.Item>
 
       <Menu.Menu position="right">

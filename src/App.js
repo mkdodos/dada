@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import Posts from "./components/Posts";
 import Balances from "./components/Balances";
+import Login from "./components/Login";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Switch>
           <Route path="/accounts" component={Accounts}></Route>
           <Route path="/balances" component={Balances}></Route>
+          <Route path="/login" component={Login}></Route>
           <Route path="/posts" component={Posts}></Route>
         </Switch>
       </BrowserRouter>
