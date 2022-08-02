@@ -12,14 +12,31 @@ import Posts from "./components/Posts";
 import Balances from "./components/Balances";
 import Login from "./components/Login";
 import User from "./components/User";
+import { auth } from "./utils/firebase";
+import React from "react";
+
 function App() {
+  const [user, setUser] = React.useState(null);
+  React.useEffect(() => {
+    auth.onAuthStateChanged((currUser) => {
+      setUser(currUser);
+    });
+  }, []);
+ 
   return (
     <>
       <BrowserRouter>
         <Header></Header>
         <Switch>
-          <Route path="/accounts" component={Accounts}></Route>
-          <Route path="/balances" component={Balances}></Route>
+          <Route path="/accounts">
+            {/* 要有登入才能查看此頁,沒有登入時導向登入頁 */}
+            {user ? <Accounts /> : <Redirect to="login" />}
+          </Route>
+          <Route path="/balances">            
+            {user ? <Balances /> : <Redirect to="login" />}
+          </Route>
+          {/* <Route path="/accounts" component={Accounts}></Route> */}
+          {/* <Route path="/balances" component={Balances}></Route> */}
           <Route path="/login" component={Login}></Route>
           <Route path="/user" component={User}></Route>
           <Route path="/posts" component={Posts}></Route>

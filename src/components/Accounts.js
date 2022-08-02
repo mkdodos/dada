@@ -176,7 +176,7 @@ export default function Accounts() {
   return (
     <>
       <Container>
-        {user && user.email}
+       
         <div className="App">
           <Grid columns={3}>{gridRows}</Grid>
         </div>
