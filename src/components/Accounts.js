@@ -37,6 +37,7 @@ export default function Accounts() {
     if (user) col = col.where("user", "==", user.email);
     // col=col.where("name","==","晚")
     col = col.onSnapshot((snapshot) => {
+      console.log(snapshot.size)
       const rows = snapshot.docs.map((doc) => {
         return { ...doc.data(), id: doc.id };
       });
@@ -122,7 +123,7 @@ export default function Accounts() {
       prior,
       user: user.email,
       createdAt: firebase.firestore.Timestamp.now(),
-    }
+    };
     if (docID) {
       db.collection("accounts").doc(docID).update(row);
     } else {
@@ -176,7 +177,6 @@ export default function Accounts() {
   return (
     <>
       <Container>
-       
         <div className="App">
           <Grid columns={3}>{gridRows}</Grid>
         </div>

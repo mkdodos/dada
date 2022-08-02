@@ -41,24 +41,12 @@ function Balances() {
   const [topAccounts, setTopAccounts] = React.useState([]);
 
   React.useEffect(() => {
-    // 帳戶資料
-    let col = db.collection("accounts");
-    // col = col.where("prior", "<=", "3");
-    if(user)
-    col = col.where("user", "==", user.email);
-    // col = col.where("prior", "<=", "1");
-    col = col.get().then((snapshot) => {
-      const data = snapshot.docs.map((doc) => {
-        return { ...doc.data(), id: doc.id };
-      });
-      setTopAccounts(data);
-      
-    });
+    
     // 收支資料
-    let colBalances = db.collection("balances")
+    let colBalances = db.collection("balances");
     if (activeAccount) {
-     
-     colBalances.where("account.id", "==", activeAccount.id)
+      colBalances
+        .where("account.id", "==", activeAccount.id)
         .onSnapshot((snapshot) => {
           const data = snapshot.docs.map((doc) => {
             return { ...doc.data(), id: doc.id };
@@ -66,8 +54,7 @@ function Balances() {
           setBalances(data);
         });
     } else {
-      if(user)
-      colBalances=colBalances.where("user", "==", user.email)
+      if (user) colBalances = colBalances.where("user", "==", user.email);
       colBalances.onSnapshot((snapshot) => {
         const data = snapshot.docs.map((doc) => {
           return { ...doc.data(), id: doc.id };
@@ -75,6 +62,16 @@ function Balances() {
         setBalances(data);
       });
     }
+    // 帳戶資料
+    let col = db.collection("accounts");
+    if (user) col = col.where("user", "==", user.email);
+    col.onSnapshot((snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
+      });
+      console.log(data)
+      setTopAccounts(data);
+    });
   }, [activeAccount]);
 
   function saveRow() {
@@ -95,8 +92,8 @@ function Balances() {
       row.account = activeAccount;
     }
 
-    if(user){
-      row.user = user.email
+    if (user) {
+      row.user = user.email;
     }
 
     if (docID) {
@@ -105,6 +102,8 @@ function Balances() {
         .set(row)
         .then(() => {
           setDefalut();
+          if (isIncome == "income") updateBalance(income);
+          else updateBalance(income * -1);
         });
     } else {
       db.collection("balances")
@@ -113,6 +112,20 @@ function Balances() {
           setDefalut();
         });
     }
+  }
+
+  // 更新帳戶餘額
+  function updateBalance(amt) {
+    const temp = activeBalance *1
+    db.collection("accounts")
+      .doc(account.id)
+      .update({
+        balance: activeBalance * 1 + amt * 1,
+      }).then(()=>{
+        setActiveAccount(account)
+        // setActiveBalance(900)
+        console.log('ok')
+      });
   }
 
   function deleteRow() {
@@ -242,7 +255,9 @@ function Balances() {
               <Grid.Column>
                 <Statistic horizontal>
                   <Statistic.Value>
-                    {numFormat(activeAccount.balance)}
+                    {numFormat(topAccounts.filter(account=>account.id==activeAccount.id)[0].balance)}
+                    {/* {numFormat(activeAccount.balance)} */}
+                    {/* {topAccounts[0].balance} */}
                   </Statistic.Value>
                   {/* <Statistic.Label>玉山</Statistic.Label> */}
                 </Statistic>
