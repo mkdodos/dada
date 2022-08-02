@@ -18,7 +18,10 @@ import {
   Modal,
   Form,
 } from "semantic-ui-react";
+import { auth } from "../utils/firebase";
+
 function Balances() {
+  const user = auth.currentUser;
   // 編輯視窗顯示控制
   const [open, setOpen] = React.useState(false);
   // 資料欄位
@@ -36,22 +39,26 @@ function Balances() {
   const [activeBalance, setActiveBalance] = React.useState(0);
   const [balances, setBalances] = React.useState([]);
   const [topAccounts, setTopAccounts] = React.useState([]);
+
   React.useEffect(() => {
     // 帳戶資料
-    db.collection("accounts")
-      .where("prior", "<=", "3")
-      .get()
-      .then((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          return { ...doc.data(), id: doc.id };
-        });
-        setTopAccounts(data);
-        console.log(topAccounts);
+    let col = db.collection("accounts");
+    // col = col.where("prior", "<=", "3");
+    if(user)
+    col = col.where("user", "==", user.email);
+    // col = col.where("prior", "<=", "1");
+    col = col.get().then((snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
       });
+      setTopAccounts(data);
+      console.log(topAccounts);
+    });
     // 收支資料
+    let colBalances = db.collection("balances")
     if (activeAccount) {
-      db.collection("balances")
-        .where("account.id", "==", activeAccount.id)
+     
+     colBalances.where("account.id", "==", activeAccount.id)
         .onSnapshot((snapshot) => {
           const data = snapshot.docs.map((doc) => {
             return { ...doc.data(), id: doc.id };
@@ -59,7 +66,9 @@ function Balances() {
           setBalances(data);
         });
     } else {
-      db.collection("balances").onSnapshot((snapshot) => {
+      if(user)
+      colBalances=colBalances.where("user", "==", user.email)
+      colBalances.onSnapshot((snapshot) => {
         const data = snapshot.docs.map((doc) => {
           return { ...doc.data(), id: doc.id };
         });
@@ -84,6 +93,10 @@ function Balances() {
 
     if (activeAccount) {
       row.account = activeAccount;
+    }
+
+    if(user){
+      row.user = user.email
     }
 
     if (docID) {
@@ -276,8 +289,9 @@ function Balances() {
                         <Table.Cell>
                           <Header as="h4">{row.title}</Header>
                           <span>{row.date} </span>
-                        {!activeAccount && <Label>{row.account && row.account.name}</Label> }  
-                         
+                          {!activeAccount && (
+                            <Label>{row.account && row.account.name}</Label>
+                          )}
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (
@@ -289,8 +303,10 @@ function Balances() {
                               提
                             </Label>
                           )}
-                          <br></br>
-                          $ {row.income ? numFormat(row.income) : numFormat(row.expense) + ""}
+                          <br></br>${" "}
+                          {row.income
+                            ? numFormat(row.income)
+                            : numFormat(row.expense) + ""}
                         </Table.Cell>
                       </Table.Row>
                     </Table.Body>
