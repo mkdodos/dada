@@ -52,7 +52,7 @@ function Balances() {
         return { ...doc.data(), id: doc.id };
       });
       setTopAccounts(data);
-      console.log(topAccounts);
+      
     });
     // 收支資料
     let colBalances = db.collection("balances")

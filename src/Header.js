@@ -41,6 +41,16 @@ function Header() {
         收支
       </Menu.Item>
 
+      <Menu.Item
+        as={Link}
+        to="/dashboard"
+        name="dashboard"
+        onClick={handleClick}
+        active={activeItem === "dashboard"}
+      >
+        Dashboard
+      </Menu.Item>
+
       {user && (
         <Menu.Item
           as={Link}

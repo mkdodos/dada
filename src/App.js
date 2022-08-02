@@ -11,6 +11,7 @@ import {
 import Posts from "./components/Posts";
 import Balances from "./components/Balances";
 import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
 import User from "./components/User";
 import { auth } from "./utils/firebase";
 import React from "react";
@@ -34,6 +35,9 @@ function App() {
           </Route>
           <Route path="/balances">            
             {user ? <Balances /> : <Redirect to="login" />}
+          </Route>
+          <Route path="/dashboard">            
+            {user ? <Dashboard /> : <Redirect to="login" />}
           </Route>
           {/* <Route path="/accounts" component={Accounts}></Route> */}
           {/* <Route path="/balances" component={Balances}></Route> */}
