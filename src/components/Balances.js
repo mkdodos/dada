@@ -30,8 +30,12 @@ function Balances() {
   const [income, setIncome] = React.useState("");
   const [account, setAccount] = React.useState();
   const [date, setDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [oldAmt, setOldAmt] = React.useState("");
+
   // 收支判斷
   const [isIncome, setIsIncome] = React.useState("income");
+  // 記錄原來是否為收入,做為計算餘額用
+  const [isIncomeOld, setIsIncomeOld] = React.useState("");
   // 選取帳戶
   const [activeAccount, setActiveAccount] = React.useState() || null;
 
@@ -41,7 +45,6 @@ function Balances() {
   const [topAccounts, setTopAccounts] = React.useState([]);
 
   React.useEffect(() => {
-    
     // 收支資料
     let colBalances = db.collection("balances");
     if (activeAccount) {
@@ -69,8 +72,13 @@ function Balances() {
       const data = snapshot.docs.map((doc) => {
         return { ...doc.data(), id: doc.id };
       });
-      console.log(data)
+      // console.log(data)
+
       setTopAccounts(data);
+      if (activeAccount)
+        setActiveBalance(
+          data.filter((account) => account.id == activeAccount.id)[0].balance
+        );
     });
   }, [activeAccount]);
 
@@ -101,14 +109,25 @@ function Balances() {
         .doc(docID)
         .set(row)
         .then(() => {
-          setDefalut();
-          if (isIncome == "income") updateBalance(income);
-          else updateBalance(income * -1);
+          let temp = 0;
+
+          // 原本為收入改支出
+          if (isIncomeOld == "income" && isIncome == "expense")
+            temp = temp - income * 1 - oldAmt * 1;
+          // 支出=>收入
+          else if (isIncomeOld == "expense" && isIncome == "income")
+            temp = temp + income * 1 + oldAmt * 1;
+          else if (isIncome == "income") temp = income - oldAmt;
+          else if (isIncome == "expense") temp = oldAmt - income;
+          updateBalance(temp);
+          // else updateBalance(income * -1);
         });
     } else {
       db.collection("balances")
         .add(row)
         .then(() => {
+          if (isIncome == "income") updateBalance(income);
+          else updateBalance(income * -1);
           setDefalut();
         });
     }
@@ -116,15 +135,17 @@ function Balances() {
 
   // 更新帳戶餘額
   function updateBalance(amt) {
-    const temp = activeBalance *1
+    // const temp = activeBalance *1
     db.collection("accounts")
-      .doc(account.id)
+      .doc(activeAccount.id)
       .update({
         balance: activeBalance * 1 + amt * 1,
-      }).then(()=>{
-        setActiveAccount(account)
+      })
+      .then(() => {
+        setDefalut();
+        // setActiveAccount(account)
         // setActiveBalance(900)
-        console.log('ok')
+        // console.log("ok");
       });
   }
 
@@ -134,7 +155,8 @@ function Balances() {
         .doc(docID)
         .delete()
         .then(() => {
-          console.log("add");
+          if (isIncome == "expense") updateBalance(income);
+          else updateBalance(income * -1);
           setDefalut();
         });
     }
@@ -152,7 +174,7 @@ function Balances() {
   }
   return (
     <>
-      <Header></Header>
+      {/* <Header>{isIncomeOld}</Header> */}
       <Container>
         <Modal
           closeIcon
@@ -242,7 +264,7 @@ function Balances() {
                       setActiveAccount(row);
                     }}
                     color="teal"
-                    inverted={activeItem === row.name}
+                    inverted={activeAccount?.name === row.name}
                   >
                     {row.name}
                   </Segment>
@@ -250,12 +272,13 @@ function Balances() {
               );
             })}
           </Grid.Row>
-          {activeItem && (
+          {activeAccount && (
             <Grid.Row>
               <Grid.Column>
                 <Statistic horizontal>
                   <Statistic.Value>
-                    {numFormat(topAccounts.filter(account=>account.id==activeAccount.id)[0].balance)}
+                    {numFormat(activeBalance)}
+                    {/* {numFormat(topAccounts.filter(account=>account.id==activeAccount.id)[0].balance)} */}
                     {/* {numFormat(activeAccount.balance)} */}
                     {/* {topAccounts[0].balance} */}
                   </Statistic.Value>
@@ -291,13 +314,20 @@ function Balances() {
                           setTitle(row.title);
                           setDate(row.date);
                           setAccount(row.account);
+                          setActiveAccount(row.account);
 
                           if (row.income) {
                             setIsIncome("income");
                             setIncome(row.income);
+                            // 記錄原金額
+                            setOldAmt(row.income);
+                            setIsIncomeOld("income");
                           } else {
                             setIsIncome("expense");
                             setIncome(row.expense);
+                            // 記錄原金額
+                            setOldAmt(row.expense);
+                            setIsIncomeOld("expense");
                           }
                         }}
                       >
