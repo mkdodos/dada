@@ -19,7 +19,6 @@ import {
   Form,
 } from "semantic-ui-react";
 import { auth } from "../utils/firebase";
-import MonthSelect from "./MonthSelect";
 
 function Balances() {
   const user = auth.currentUser;
@@ -48,15 +47,24 @@ function Balances() {
   React.useEffect(() => {
     // 收支資料
     let colBalances = db.collection("balances");
-    if (user) colBalances = colBalances.where("user", "==", user.email);
-    if (activeAccount) {colBalances = colBalances.where("account.id", "==", activeAccount.id)}
-    colBalances.orderBy('date','desc').onSnapshot((snapshot) => {
-      const data = snapshot.docs.map((doc) => {
-        return { ...doc.data(), id: doc.id };
+    if (activeAccount) {
+      colBalances
+        .where("account.id", "==", activeAccount.id)
+        .onSnapshot((snapshot) => {
+          const data = snapshot.docs.map((doc) => {
+            return { ...doc.data(), id: doc.id };
+          });
+          setBalances(data);
+        });
+    } else {
+      if (user) colBalances = colBalances.where("user", "==", user.email);
+      colBalances.onSnapshot((snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          return { ...doc.data(), id: doc.id };
+        });
+        setBalances(data);
       });
-      setBalances(data);
-    });
-
+    }
     // 帳戶資料
     let col = db.collection("accounts");
     if (user) col = col.where("user", "==", user.email);
@@ -166,12 +174,8 @@ function Balances() {
   }
   return (
     <>
-
       {/* <Header>{isIncomeOld}</Header> */}
       <Container>
-        <MonthSelect onChange={(e,obj)=>{
-          console.log(obj.value)
-        }}/>
         <Modal
           closeIcon
           open={open}

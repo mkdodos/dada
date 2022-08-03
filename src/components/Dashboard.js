@@ -8,20 +8,9 @@ import {
 import { db, auth } from "../utils/firebase";
 import React from "react";
 import { numFormat } from "../utils/stringFormat";
+import MonthSelect from "./MonthSelect";
 function Dashboard() {
-  const months = [];
-  // const i = "5"
-  for (let i = 1; i <= 12; i++){
-    let num = i;
-    if(i<=9)num='0'+i
-    months.push({
-      key: num,
-      text: num,
-      value: num,
-    });
-    console.log(num)
-  }
-  
+ 
    
   const user = auth.currentUser;
   const [total, setTotal] = React.useState({});
@@ -45,15 +34,9 @@ function Dashboard() {
   }, [month]);
   return (
     <Container>
-      <Dropdown
-        selection
-        value={month}
-        placeholder="順位"
-        options={months}
-        onChange={(e, obj) => {
-          setMonth(obj.value);
-        }}
-      ></Dropdown>
+      <MonthSelect onChange={(e,obj)=>{
+          setMonth(obj.value)
+        }}/>
       <Grid columns={1}>
         <Grid.Row stretched>
           <Grid.Column textAlign="center">

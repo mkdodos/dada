@@ -48,7 +48,7 @@ function Header() {
         onClick={handleClick}
         active={activeItem === "dashboard"}
       >
-        Dashboard
+        統計
       </Menu.Item>
 
       {user && (

@@ -34,7 +34,8 @@ function App() {
             {user ? <Accounts /> : <Redirect to="login" />}
           </Route>
           <Route path="/balances">            
-            {user ? <Balances /> : <Redirect to="login" />}
+             <Balances /> 
+            {/* {user ? <Balances /> : <Redirect to="login" />} */}
           </Route>
           <Route path="/dashboard">            
             {user ? <Dashboard /> : <Redirect to="login" />}
