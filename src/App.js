@@ -35,15 +35,17 @@ function App() {
             {user ? <Accounts /> : <Redirect to="login" />}
           </Route>
           <Route path="/balances">            
-             <Balances /> 
-            {/* {user ? <Balances /> : <Redirect to="login" />} */}
+             {/* <Balances />  */}
+            {user ? <Balances /> : <Redirect to="login" />}
           </Route>
-          <Route path="/query-balances">            
-             <QueryBalances /> 
+          <Route path="/query-balances">     
+          {user ? <QueryBalances /> : <Redirect to="login" />}       
+             {/* <QueryBalances />  */}
             
           </Route>
-          <Route path="/dashboard">            
-           <Dashboard />           
+          <Route path="/dashboard">    
+          {user ? <Dashboard /> : <Redirect to="login" />}          
+                
           </Route>
           {/* <Route path="/accounts" component={Accounts}></Route> */}
           {/* <Route path="/balances" component={Balances}></Route> */}
