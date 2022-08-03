@@ -9,18 +9,20 @@ import { db, auth } from "../utils/firebase";
 import React from "react";
 import { numFormat } from "../utils/stringFormat";
 import MonthSelect from "./MonthSelect";
+import {MonthButton} from "./MonthSelect"
 function Dashboard() {
  
    
   const user = auth.currentUser;
   const [total, setTotal] = React.useState({});
-  const [month, setMonth] = React.useState();
+  const [month, setMonth] = React.useState(`0${new Date().getMonth()+1}`);
   //   const m = "07"
   React.useEffect(() => {
-    db.collection("balances")
-      .where("user", "==", user.email)
-      .where("date", ">=", `2022-${month}-01`)
-      .where("date", "<=", `2022-${month}-31`)
+  let col =  db.collection("balances")
+  if(user)
+    col = col.where("user", "==", user?.email)
+      col.where("date", ">=", `2022-${month}-01`)
+      col.where("date", "<=", `2022-${month}-31`)
       .get()
       .then((snapshot) => {
         let income = 0;
@@ -34,9 +36,10 @@ function Dashboard() {
   }, [month]);
   return (
     <Container>
-      <MonthSelect onChange={(e,obj)=>{
+      {/* <MonthSelect onChange={(e,obj)=>{
           setMonth(obj.value)
         }}/>
+        <MonthButton></MonthButton> */}
       <Grid columns={1}>
         <Grid.Row stretched>
           <Grid.Column textAlign="center">

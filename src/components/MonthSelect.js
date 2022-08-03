@@ -4,9 +4,11 @@ import {
   Segment,
   Statistic,
   Dropdown,
+  Menu,
+  Button,
 } from "semantic-ui-react";
 import React from "react";
-export default function MonthSelect(props) {
+function MonthSelect(props) {
   const [month, setMonth] = React.useState();
   const months = [];
 
@@ -18,7 +20,6 @@ export default function MonthSelect(props) {
       text: num,
       value: num,
     });
-    
   }
   return (
     <Dropdown
@@ -28,6 +29,24 @@ export default function MonthSelect(props) {
       options={months}
       onChange={props.onChange}
     ></Dropdown>
-  )
-  
+  );
 }
+
+function MonthButton(props) {
+  return (
+    <Menu widths={3}>
+      <Menu.Item>
+        <Button onClick={props.onMinusClick}>-</Button>
+      </Menu.Item>
+      <Menu.Item>
+        <Button primary onClick={props.onClick}>{props.text}</Button>
+      </Menu.Item>
+      <Menu.Item>
+        <Button onClick={props.onPlusClick}>+</Button>
+      </Menu.Item>
+    </Menu>
+  );
+}
+
+export default MonthSelect;
+export { MonthButton };

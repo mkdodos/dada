@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import Posts from "./components/Posts";
 import Balances from "./components/Balances";
+import QueryBalances from "./components/QueryBalances";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import User from "./components/User";
@@ -17,7 +18,7 @@ import { auth } from "./utils/firebase";
 import React from "react";
 
 function App() {
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = React.useState() || null;
   React.useEffect(() => {
     auth.onAuthStateChanged((currUser) => {
       setUser(currUser);
@@ -37,8 +38,12 @@ function App() {
              <Balances /> 
             {/* {user ? <Balances /> : <Redirect to="login" />} */}
           </Route>
+          <Route path="/query-balances">            
+             <QueryBalances /> 
+            
+          </Route>
           <Route path="/dashboard">            
-            {user ? <Dashboard /> : <Redirect to="login" />}
+           <Dashboard />           
           </Route>
           {/* <Route path="/accounts" component={Accounts}></Route> */}
           {/* <Route path="/balances" component={Balances}></Route> */}

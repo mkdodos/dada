@@ -169,9 +169,9 @@ function Balances() {
 
       {/* <Header>{isIncomeOld}</Header> */}
       <Container>
-        <MonthSelect onChange={(e,obj)=>{
+        {/* <MonthSelect onChange={(e,obj)=>{
           console.log(obj.value)
-        }}/>
+        }}/> */}
         <Modal
           closeIcon
           open={open}
