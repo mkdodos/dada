@@ -40,6 +40,8 @@ function Balances() {
   // 選取帳戶
   const [activeAccount, setActiveAccount] = React.useState() || null;
 
+  const [loading, setIsLoding] = React.useState(false);
+
   const [activeItem, setActiveItem] = React.useState("");
   const [activeBalance, setActiveBalance] = React.useState(0);
   const [balances, setBalances] = React.useState([]);
@@ -75,6 +77,7 @@ function Balances() {
   }, [activeAccount]);
 
   function saveRow() {
+    setIsLoding(true)
     let row = {
       title,
       date,
@@ -112,6 +115,7 @@ function Balances() {
           else if (isIncome == "income") temp = income - oldAmt;
           else if (isIncome == "expense") temp = oldAmt - income;
           updateBalance(temp);
+
           // else updateBalance(income * -1);
         });
     } else {
@@ -135,6 +139,7 @@ function Balances() {
       })
       .then(() => {
         setDefalut();
+        setIsLoding(false)
         // setActiveAccount(account)
         // setActiveBalance(900)
         // console.log("ok");
@@ -240,7 +245,7 @@ function Balances() {
               </Button>
             )}
 
-            <Button color="green" onClick={saveRow}>
+            <Button color="green" loading={loading} onClick={saveRow}>
               <Icon name="check" />
               Save
             </Button>

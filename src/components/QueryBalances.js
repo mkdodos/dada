@@ -1,13 +1,15 @@
 import { Container, Button, Grid, Menu, Table } from "semantic-ui-react";
 import { MonthButton } from "./MonthSelect";
 import React from "react";
-import { db } from "../utils/firebase";
+import { db,auth } from "../utils/firebase";
 export default function QueryBalances() {
+    const user = auth.currentUser;
   const [month, setMonth] = React.useState(new Date().getMonth() + 1);
   const [balances, setBalances] = React.useState([]);
   React.useEffect(() => {
     // 收支資料
     let colBalances = db.collection("balances");
+    if (user) colBalances = colBalances.where("user", "==", user.email);
     colBalances = colBalances
       .where("date", ">=", `2022-0${month}-01`)
       .where("date", "<=", `2022-0${month}-31`);
