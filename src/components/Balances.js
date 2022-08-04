@@ -387,7 +387,7 @@ function Balances() {
                           <Header as="h4">{row.title}</Header>
                           <span>{row.date} </span>
                           {!activeAccount && (
-                            <Label>{row.account && row.account.name}</Label>
+                            <Label color="teal">{row.account && row.account.name}</Label>
                           )}
                         {row.cate && <Label>{row.cate}</Label> } 
                         </Table.Cell>

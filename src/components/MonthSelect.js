@@ -35,15 +35,17 @@ function MonthSelect(props) {
 function MonthButton(props) {
   return (
     <Menu widths={3}>
+        <Menu.Item>
+        <Button onClick={props.onPlusClick}>+</Button>
+      </Menu.Item>
+      <Menu.Item>
+        <Button  primary onDoubleClick={props.onDoubleClick} onClick={props.onClick}>{props.text}</Button>
+      </Menu.Item>
       <Menu.Item>
         <Button onClick={props.onMinusClick}>-</Button>
       </Menu.Item>
-      <Menu.Item>
-        <Button primary onClick={props.onClick}>{props.text}</Button>
-      </Menu.Item>
-      <Menu.Item>
-        <Button onClick={props.onPlusClick}>+</Button>
-      </Menu.Item>
+     
+    
     </Menu>
   );
 }
