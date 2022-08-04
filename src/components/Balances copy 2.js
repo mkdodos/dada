@@ -17,7 +17,6 @@ import {
   Statistic,
   Modal,
   Form,
-  Dropdown,
 } from "semantic-ui-react";
 import { auth } from "../utils/firebase";
 import MonthSelect from "./MonthSelect";
@@ -48,38 +47,7 @@ function Balances() {
   const [balances, setBalances] = React.useState([]);
   const [topAccounts, setTopAccounts] = React.useState([]);
 
-  const [cate, setCate] = React.useState();
-  const [cates, setCates] = React.useState([]);
-
-  // const cates = [
-  //   {
-  //     text: "加油",
-  //     value: "加油",
-  //     key: "a",
-    
-  //   },
-  //   {
-  //     text: "房貸",
-  //     value: "房貸",
-  //     key: "b",
-    
-  //   },
-   
-  // ];
-
   React.useEffect(() => {
-    // 類別資料
-    let colCates = db.collection("cates").orderBy("prior");    
-    if (user) colCates = colCates.where("user", "==", user.email);
-   
-    colCates = colCates.onSnapshot((snapshot) => {    
-      const rows = snapshot.docs.map((doc) => {
-        const d = doc.data()
-        return { text:d.name,value:d.name ,key: doc.id };
-      });
-      setCates(rows)
-    })
-
     // 收支資料
     let colBalances = db.collection("balances");
     if (user) colBalances = colBalances.where("user", "==", user.email);
@@ -115,7 +83,6 @@ function Balances() {
     let row = {
       title,
       date,
-      cate
     };
     if (isIncome == "income") {
       row.income = income;
@@ -208,8 +175,9 @@ function Balances() {
     <>
       {/* <Header>{isIncomeOld}</Header> */}
       <Container>
-     
-
+        {/* <MonthSelect onChange={(e,obj)=>{
+          console.log(obj.value)
+        }}/> */}
         <Modal
           closeIcon
           open={open}
@@ -239,32 +207,42 @@ function Balances() {
               </Menu.Item>
             </Menu>
             <Form size="large">
-              <Form.Field>
-                <label>日期</label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => {
-                    setDate(e.target.value);
-                  }}
-                />
-              </Form.Field>
-
-              {/* <Form.Input width={8} label="Last name" placeholder="Last name" /> */}
-              <Form.Select
-            
-              selection
-              fluid
-                label="類別"
-                placeholder=""
-                value={cate}
-                options={cates}
-                onChange={(e, obj) => {
-                  setCate(obj.value);
-                  console.log(obj.value);
-                }}
-              />
-
+              <Grid columns={2}>
+                <Grid.Row>
+                  <Grid.Column width={10}>
+                    {" "}
+                    <Form.Field>
+                      <label>日期</label>
+                      <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => {
+                          setDate(e.target.value);
+                        }}
+                      />
+                    </Form.Field>
+                  </Grid.Column>
+                  <Grid.Column></Grid.Column>
+                 
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column width={10}>
+                    {" "}
+                    <Form.Field>
+                      <label>日期</label>
+                      <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => {
+                          setDate(e.target.value);
+                        }}
+                      />
+                    </Form.Field>
+                  </Grid.Column>
+                  <Grid.Column></Grid.Column>
+                 
+                </Grid.Row>
+              </Grid>
 
               <Form.Field>
                 <label>項目</label>
@@ -365,7 +343,6 @@ function Balances() {
                           setTitle(row.title);
                           setDate(row.date);
                           setAccount(row.account);
-                          setCate(row.cate)
                           setActiveAccount(row.account);
 
                           if (row.income) {
@@ -389,7 +366,6 @@ function Balances() {
                           {!activeAccount && (
                             <Label>{row.account && row.account.name}</Label>
                           )}
-                        {row.cate && <Label>{row.cate}</Label> } 
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (

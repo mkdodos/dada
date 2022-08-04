@@ -20,7 +20,6 @@ function Header() {
   }
   return (
     <Menu secondary pointing widths={5}>
-      
       <Menu.Item
         as={Link}
         to="/balances"
@@ -51,27 +50,17 @@ function Header() {
         統計
       </Menu.Item>
 
-      
-
       <Dropdown item text="設定">
         <Dropdown.Menu>
           <Dropdown.Item as={Link} to="/user">
             使用者
           </Dropdown.Item>
-          <Dropdown.Item as={Link}
-        to="/accounts">帳戶</Dropdown.Item>
-          <Dropdown.Item>Home</Dropdown.Item>
+          <Dropdown.Item as={Link} to="/accounts">
+            帳戶
+          </Dropdown.Item>
+          <Dropdown.Item  as={Link} to="/cates">類別</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-
-      {/* <Menu.Menu>
-        <Menu.Item name="gamepad">
-          <Icon name="gamepad" />
-        </Menu.Item>
-        <Menu.Item name="video camera">
-          <Icon name="video camera" />
-        </Menu.Item>
-      </Menu.Menu> */}
 
       <Menu.Menu position="right">
         {user ? (

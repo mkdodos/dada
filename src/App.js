@@ -1,5 +1,6 @@
 import Header from "./Header";
 import Accounts from "./components/Accounts";
+import Cates from "./components/Cates";
 import {
   BrowserRouter,
   Route,
@@ -33,6 +34,9 @@ function App() {
           <Route path="/accounts">
             {/* 要有登入才能查看此頁,沒有登入時導向登入頁 */}
             {user ? <Accounts /> : <Redirect to="login" />}
+          </Route>
+          <Route path="/cates">          
+            {user ? <Cates /> : <Redirect to="login" />}
           </Route>
           <Route path="/balances">            
              {/* <Balances />  */}
