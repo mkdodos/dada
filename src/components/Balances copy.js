@@ -17,8 +17,11 @@ import {
   Statistic,
   Modal,
   Form,
+  Dropdown,
+  Divider,
 } from "semantic-ui-react";
 import { auth } from "../utils/firebase";
+import MonthSelect from "./MonthSelect";
 
 function Balances() {
   const user = auth.currentUser;
@@ -33,59 +36,95 @@ function Balances() {
   const [oldAmt, setOldAmt] = React.useState("");
 
   // 收支判斷
-  const [isIncome, setIsIncome] = React.useState("income");
+  const [isIncome, setIsIncome] = React.useState("expense");
   // 記錄原來是否為收入,做為計算餘額用
   const [isIncomeOld, setIsIncomeOld] = React.useState("");
   // 選取帳戶
   const [activeAccount, setActiveAccount] = React.useState() || null;
+
+  const [loading, setIsLoding] = React.useState(false);
 
   const [activeItem, setActiveItem] = React.useState("");
   const [activeBalance, setActiveBalance] = React.useState(0);
   const [balances, setBalances] = React.useState([]);
   const [topAccounts, setTopAccounts] = React.useState([]);
 
+  const [cate, setCate] = React.useState();
+  const [cates, setCates] = React.useState([]);
+  // 全部帳戶的筆數
+  const [accountsTotalRows, setAccountsTotalRows] = React.useState(0);
+
+  // 記錄最後一筆帳戶
+  const lastAccountRef = React.useRef();
+
+  // 記錄第一筆帳戶
+  const firstAccountRef = React.useRef();
+
+  // 記錄前3筆帳戶
+  const top3Accounts = React.useRef();
+
   React.useEffect(() => {
-    // 收支資料
-    let colBalances = db.collection("balances");
-    if (activeAccount) {
-      colBalances
-        .where("account.id", "==", activeAccount.id)
-        .onSnapshot((snapshot) => {
-          const data = snapshot.docs.map((doc) => {
-            return { ...doc.data(), id: doc.id };
-          });
-          setBalances(data);
-        });
-    } else {
-      if (user) colBalances = colBalances.where("user", "==", user.email);
-      colBalances.onSnapshot((snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          return { ...doc.data(), id: doc.id };
-        });
-        setBalances(data);
-      });
-    }
     // 帳戶資料
     let col = db.collection("accounts");
     if (user) col = col.where("user", "==", user.email);
-    col.onSnapshot((snapshot) => {
+    // 帳戶筆數
+    col.get().then((snapshot) => {
+      setAccountsTotalRows(snapshot.size);
+      console.log(snapshot.size);
+    });
+
+    // if (lastAccountRef.current) col = col.startAfter(lastAccountRef.current);
+    col.limit(3).onSnapshot((snapshot) => {
       const data = snapshot.docs.map((doc) => {
         return { ...doc.data(), id: doc.id };
       });
-      // console.log(data)
-
+      top3Accounts.current = data;
+      firstAccountRef.current = snapshot.docs[0];
+      // 最後一筆文件的參照
+      // if(!lastAccountRef.current)
+      lastAccountRef.current = snapshot.docs[snapshot.docs.length - 1];
+      console.log(data);
       setTopAccounts(data);
       if (activeAccount)
         setActiveBalance(
           data.filter((account) => account.id == activeAccount.id)[0].balance
         );
     });
+  }, []);
+
+  React.useEffect(() => {
+    // 類別資料
+    let colCates = db.collection("cates").orderBy("prior");
+    if (user) colCates = colCates.where("user", "==", user.email);
+
+    colCates = colCates.onSnapshot((snapshot) => {
+      const rows = snapshot.docs.map((doc) => {
+        const d = doc.data();
+        return { text: d.name, value: d.name, key: doc.id };
+      });
+      setCates(rows);
+    });
+
+    // 收支資料
+    let colBalances = db.collection("balances");
+    if (user) colBalances = colBalances.where("user", "==", user.email);
+    if (activeAccount) {
+      colBalances = colBalances.where("account.id", "==", activeAccount.id);
+    }
+    colBalances.orderBy("date", "desc").onSnapshot((snapshot) => {
+      const data = snapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
+      });
+      setBalances(data);
+    });
   }, [activeAccount]);
 
   function saveRow() {
+    setIsLoding(true);
     let row = {
       title,
       date,
+      cate,
     };
     if (isIncome == "income") {
       row.income = income;
@@ -120,6 +159,7 @@ function Balances() {
           else if (isIncome == "income") temp = income - oldAmt;
           else if (isIncome == "expense") temp = oldAmt - income;
           updateBalance(temp);
+
           // else updateBalance(income * -1);
         });
     } else {
@@ -143,6 +183,7 @@ function Balances() {
       })
       .then(() => {
         setDefalut();
+        setIsLoding(false);
         // setActiveAccount(account)
         // setActiveBalance(900)
         // console.log("ok");
@@ -215,6 +256,21 @@ function Balances() {
                   }}
                 />
               </Form.Field>
+
+              {/* <Form.Input width={8} label="Last name" placeholder="Last name" /> */}
+              <Form.Select
+                selection
+                fluid
+                label="類別"
+                placeholder=""
+                value={cate}
+                options={cates}
+                onChange={(e, obj) => {
+                  setCate(obj.value);
+                  console.log(obj.value);
+                }}
+              />
+
               <Form.Field>
                 <label>項目</label>
                 <input
@@ -244,44 +300,73 @@ function Balances() {
               </Button>
             )}
 
-            <Button color="green" onClick={saveRow}>
+            <Button color="green" loading={loading} onClick={saveRow}>
               <Icon name="check" />
               Save
             </Button>
           </Modal.Actions>
         </Modal>
         {/* 帳戶 */}
-        <Grid columns="equal">
-          <Grid.Row>
-            {topAccounts.map((row, i) => {
-              return (
-                <Grid.Column key={i}>
-                  <Segment
-                    textAlign="center"
-                    onClick={() => {
-                      setActiveItem(row.name);
-                      setActiveBalance(row.balance);
-                      setActiveAccount(row);
-                    }}
-                    color="teal"
-                    inverted={activeAccount?.name === row.name}
-                  >
-                    {row.name}
-                  </Segment>
-                </Grid.Column>
-              );
-            })}
-          </Grid.Row>
-          {activeAccount && (
+        <Grid columns={3}>
+          {topAccounts.map((row, i) => (
+            <Grid.Column key={row.id}>
+              <Segment
+                textAlign="center"
+                onClick={() => {
+                  setActiveItem(row.name);
+                  setActiveBalance(row.balance);
+                  setActiveAccount(row);
+                }}
+                color="teal"
+                inverted={activeAccount?.name === row.name}
+              >
+                {row.name}
+              </Segment>
+            </Grid.Column>
+          ))}
+        </Grid>
+        {activeAccount && (
+          <Grid columns={2}>
             <Grid.Row>
-              <Grid.Column>
+              <Grid.Column
+                onClick={() => {
+                  // 帳戶資料
+                  let col = db.collection("accounts");
+                  if (user) col = col.where("user", "==", user.email);
+                  col.limit(3);
+
+                  col = col
+                    .startAfter(lastAccountRef.current)
+
+                    .onSnapshot((snapshot) => {
+                      const data = snapshot.docs.map((doc) => {
+                        return { ...doc.data(), id: doc.id };
+                      });
+                      setTopAccounts(data);
+                      lastAccountRef.current =
+                        snapshot.docs[snapshot.docs.length - 1];
+                      // 最後一筆文件的參照
+                      if (snapshot.size == 0) {
+                        // 帳戶資料
+                        let col = db.collection("accounts");
+                        if (user) col = col.where("user", "==", user.email);
+
+                        col.limit(3).onSnapshot((snapshot) => {
+                          const data = snapshot.docs.map((doc) => {
+                            return { ...doc.data(), id: doc.id };
+                          });
+                          setTopAccounts(data);
+                          lastAccountRef.current =
+                            snapshot.docs[snapshot.docs.length - 1];
+                        });
+
+                        console.log(lastAccountRef.current);
+                      }
+                    });
+                }}
+              >
                 <Statistic horizontal>
-                  <Statistic.Value>
-                    {numFormat(activeBalance)}
-                    {/* {numFormat(topAccounts.filter(account=>account.id==activeAccount.id)[0].balance)} */}
-                    {/* {numFormat(activeAccount.balance)} */}
-                    {/* {topAccounts[0].balance} */}
-                  </Statistic.Value>
+                  <Statistic.Value>{numFormat(activeBalance)}</Statistic.Value>
                   {/* <Statistic.Label>玉山</Statistic.Label> */}
                 </Statistic>
               </Grid.Column>
@@ -292,20 +377,22 @@ function Balances() {
                   color="blue"
                   onClick={() => {
                     setOpen(true);
-                    // setIsIncome('income')
                   }}
                 >
                   <Icon name="plus" /> Create
                 </Button>
               </Grid.Column>
             </Grid.Row>
-          )}
-          {/*資料表格*/}
+          </Grid>
+        )}
+
+        {/*資料表格*/}
+        <Grid>
           <Grid.Row>
             <Grid.Column>
               {balances.map((row, i) => {
                 return (
-                  <Table key={i} unstackable>
+                  <Table key={row.id} unstackable>
                     <Table.Body>
                       <Table.Row
                         onClick={() => {
@@ -314,6 +401,7 @@ function Balances() {
                           setTitle(row.title);
                           setDate(row.date);
                           setAccount(row.account);
+                          setCate(row.cate);
                           setActiveAccount(row.account);
 
                           if (row.income) {
@@ -335,8 +423,9 @@ function Balances() {
                           <Header as="h4">{row.title}</Header>
                           <span>{row.date} </span>
                           {!activeAccount && (
-                            <Label>{row.account && row.account.name}</Label>
+                            <Label color="teal">{row.account.name}</Label>
                           )}
+                          {row.cate && <Label>{row.cate}</Label>}
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (

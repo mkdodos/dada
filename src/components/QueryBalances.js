@@ -10,9 +10,15 @@ import {
 import { MonthButton } from "./MonthSelect";
 import React from "react";
 import { db, auth } from "../utils/firebase";
+
+import { numFormat } from "../utils/stringFormat";
+
 export default function QueryBalances() {
   const user = auth.currentUser;
   const [month, setMonth] = React.useState(new Date().getMonth() + 1);
+  // 中間按鈕按下切換全年或當月
+  const [isMonth, setIsMonth] = React.useState(false);
+
   const [balances, setBalances] = React.useState([]);
   const [cate, setCate] = React.useState();
   const [cates, setCates] = React.useState([]);
@@ -30,10 +36,10 @@ export default function QueryBalances() {
     // 收支資料
     let colBalances = db.collection("balances");
     if (user) colBalances = colBalances.where("user", "==", user.email);
-   if(month!==0)
-    colBalances = colBalances
-      .where("date", ">=", `2022-0${month}-01`)
-      .where("date", "<=", `2022-0${month}-31`);
+    if (month !== 0)
+      colBalances = colBalances
+        .where("date", ">=", `2022-0${month}-01`)
+        .where("date", "<=", `2022-0${month}-31`);
     if (cate) colBalances = colBalances.where("cate", "==", cate);
 
     colBalances.orderBy("date", "desc").onSnapshot((snapshot) => {
@@ -52,13 +58,20 @@ export default function QueryBalances() {
   return (
     <Container>
       <MonthButton
-        text={(month!==0?`${month} 月`:"全年")}
+        text={month !== 0 ? `${month} 月` : "全年"}
         onPlusClick={() => {
           if (month == 12) setMonth(0);
           else setMonth(month + 1);
         }}
+        // 中間按鈕按下切換全年或當月
         onClick={() => {
-          setMonth(new Date().getMonth() + 1);
+          if (isMonth) {
+            setMonth(new Date().getMonth() + 1);
+            setIsMonth(false);
+          } else {
+            setMonth(0);
+            setIsMonth(true);
+          }
         }}
         onDoubleClick={() => {
           setMonth(0);
@@ -67,7 +80,6 @@ export default function QueryBalances() {
           if (month == 0) setMonth(12);
           else setMonth(month - 1);
         }}
-
       ></MonthButton>
       <Menu color="blue" pointing secondary>
         {cates.map((obj, i) => (
@@ -108,8 +120,8 @@ export default function QueryBalances() {
           <Table.Row>
             <Table.HeaderCell width={3}>日期</Table.HeaderCell>
             <Table.HeaderCell>項目</Table.HeaderCell>
-            <Table.HeaderCell width={3}>收入</Table.HeaderCell>
-            <Table.HeaderCell>支出</Table.HeaderCell>
+            <Table.HeaderCell width={3} textAlign="right">收支</Table.HeaderCell>
+            {/* <Table.HeaderCell>支出</Table.HeaderCell> */}
           </Table.Row>
         </Table.Header>
 
@@ -118,10 +130,11 @@ export default function QueryBalances() {
             <Table.Row key={i}>
               <Table.Cell>{row.date.slice(5, 10)}</Table.Cell>
               <Table.Cell>
-                <Label>{row.cate}</Label>{`  ${row.title}`}
+                <Label>{row.cate}</Label>
+                {`  ${row.title}`}
               </Table.Cell>
-              <Table.Cell>{row.income}</Table.Cell>
-              <Table.Cell>{row.expense}</Table.Cell>
+              <Table.Cell textAlign="right"> {row.income ?<Label color="teal">{numFormat(row.income)}</Label> :
+             numFormat(row.expense)  }</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>

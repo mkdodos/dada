@@ -18,6 +18,7 @@ import {
   Modal,
   Form,
   Dropdown,
+  Divider,
 } from "semantic-ui-react";
 import { auth } from "../utils/firebase";
 import MonthSelect from "./MonthSelect";
@@ -50,35 +51,63 @@ function Balances() {
 
   const [cate, setCate] = React.useState();
   const [cates, setCates] = React.useState([]);
+  // 全部帳戶的筆數
+  const [accountsTotalRows, setAccountsTotalRows] = React.useState(0);
 
-  // const cates = [
-  //   {
-  //     text: "加油",
-  //     value: "加油",
-  //     key: "a",
-    
-  //   },
-  //   {
-  //     text: "房貸",
-  //     value: "房貸",
-  //     key: "b",
-    
-  //   },
-   
-  // ];
+  // 目前頁數
+  let [currentPage, setCurrentPage] = React.useState(0);
+
+  // 每頁筆數
+  const rowsPerPage = 3;
+
+  // 記錄總頁數
+  const totalPages = React.useRef();
+
+  // 記錄最後一筆帳戶
+  const lastAccountRef = React.useRef();
+
+  // 記錄第一筆帳戶
+  const firstAccountRef = React.useRef();
+
+  // 記錄前3筆帳戶
+  const top3Accounts = React.useRef();
+
+  React.useEffect(() => {
+    // 帳戶資料
+    let col = db.collection("accounts");
+    if (user) col = col.where("user", "==", user.email);
+    // 帳戶筆數
+    col.get().then((snapshot) => {
+      totalPages.current = Math.ceil(snapshot.size / rowsPerPage);
+      setAccountsTotalRows(snapshot.size);
+      const data = snapshot.docs.map((doc, index) => {
+        return { ...doc.data(), id: doc.id, index };
+      });
+      topAccounts.current = data;
+      // setTopAccounts(data.filter(row=>row.index>=0 && row.index<=2));
+      setTopAccounts(
+        data.filter(
+          (row) =>
+            row.index >= currentPage * rowsPerPage &&
+            row.index < (currentPage + 1) * rowsPerPage
+        )
+      );
+      // console.log(snapshot.size);
+    });
+  }, [currentPage]);
 
   React.useEffect(() => {
     // 類別資料
-    let colCates = db.collection("cates").orderBy("prior");    
+    let colCates = db.collection("cates").orderBy("prior");
     if (user) colCates = colCates.where("user", "==", user.email);
-   
-    colCates = colCates.onSnapshot((snapshot) => {    
+
+    colCates = colCates.onSnapshot((snapshot) => {
       const rows = snapshot.docs.map((doc) => {
-        const d = doc.data()
-        return { text:d.name,value:d.name ,key: doc.id };
+        const d = doc.data();
+        return { text: d.name, value: d.name, key: doc.id };
       });
-      setCates(rows)
-    })
+      setCates(rows);
+    });
 
     // 收支資料
     let colBalances = db.collection("balances");
@@ -92,22 +121,6 @@ function Balances() {
       });
       setBalances(data);
     });
-
-    // 帳戶資料
-    let col = db.collection("accounts");
-    if (user) col = col.where("user", "==", user.email);
-    col.onSnapshot((snapshot) => {
-      const data = snapshot.docs.map((doc) => {
-        return { ...doc.data(), id: doc.id };
-      });
-      // console.log(data)
-
-      setTopAccounts(data);
-      if (activeAccount)
-        setActiveBalance(
-          data.filter((account) => account.id == activeAccount.id)[0].balance
-        );
-    });
   }, [activeAccount]);
 
   function saveRow() {
@@ -115,7 +128,7 @@ function Balances() {
     let row = {
       title,
       date,
-      cate
+      cate,
     };
     if (isIncome == "income") {
       row.income = income;
@@ -208,8 +221,6 @@ function Balances() {
     <>
       {/* <Header>{isIncomeOld}</Header> */}
       <Container>
-     
-
         <Modal
           closeIcon
           open={open}
@@ -252,9 +263,8 @@ function Balances() {
 
               {/* <Form.Input width={8} label="Last name" placeholder="Last name" /> */}
               <Form.Select
-            
-              selection
-              fluid
+                selection
+                fluid
                 label="類別"
                 placeholder=""
                 value={cate}
@@ -264,7 +274,6 @@ function Balances() {
                   console.log(obj.value);
                 }}
               />
-
 
               <Form.Field>
                 <label>項目</label>
@@ -302,38 +311,43 @@ function Balances() {
           </Modal.Actions>
         </Modal>
         {/* 帳戶 */}
-        <Grid columns="equal">
-          <Grid.Row>
-            {topAccounts.map((row, i) => {
-              return (
-                <Grid.Column key={i}>
-                  <Segment
-                    textAlign="center"
-                    onClick={() => {
-                      setActiveItem(row.name);
-                      setActiveBalance(row.balance);
-                      setActiveAccount(row);
-                    }}
-                    color="teal"
-                    inverted={activeAccount?.name === row.name}
-                  >
-                    {row.name}
-                  </Segment>
-                </Grid.Column>
-              );
-            })}
-          </Grid.Row>
-          {activeAccount && (
+        <Grid columns={3}>
+          {topAccounts.map((row, i) => (
+            <Grid.Column key={row.id}>
+              <Segment
+                textAlign="center"
+                onClick={() => {
+                  setActiveItem(row.name);
+                  setActiveBalance(row.balance);
+                  setActiveAccount(row);
+                }}
+                color="teal"
+                inverted={activeAccount?.name === row.name}
+              >
+                {row.name}
+              </Segment>
+            </Grid.Column>
+          ))}
+        </Grid>
+        {activeAccount && (
+          <Grid columns={2}>
             <Grid.Row>
-              <Grid.Column>
+              <Grid.Column
+                onClick={() => {
+                  setCurrentPage(currentPage + 1);
+                  // 最後一頁
+                  if (currentPage == totalPages.current-1) {
+                    setCurrentPage(0);
+                  }
+                  // console.log(currentPage)
+                  // console.log(totalPages)
+
+                  // setCurrentPage(1)
+                }}
+              >
                 <Statistic horizontal>
-                  <Statistic.Value>
-                    {numFormat(activeBalance)}
-                    {/* {numFormat(topAccounts.filter(account=>account.id==activeAccount.id)[0].balance)} */}
-                    {/* {numFormat(activeAccount.balance)} */}
-                    {/* {topAccounts[0].balance} */}
-                  </Statistic.Value>
-                  {/* <Statistic.Label>玉山</Statistic.Label> */}
+                  <Statistic.Value>{numFormat(activeBalance)}</Statistic.Value>
+                  {/* <Statistic.Label>{totalPages.current}</Statistic.Label> */}
                 </Statistic>
               </Grid.Column>
 
@@ -343,20 +357,22 @@ function Balances() {
                   color="blue"
                   onClick={() => {
                     setOpen(true);
-                    // setIsIncome('income')
                   }}
                 >
                   <Icon name="plus" /> Create
                 </Button>
               </Grid.Column>
             </Grid.Row>
-          )}
-          {/*資料表格*/}
+          </Grid>
+        )}
+
+        {/*資料表格*/}
+        <Grid>
           <Grid.Row>
             <Grid.Column>
               {balances.map((row, i) => {
                 return (
-                  <Table key={i} unstackable>
+                  <Table key={row.id} unstackable>
                     <Table.Body>
                       <Table.Row
                         onClick={() => {
@@ -365,7 +381,7 @@ function Balances() {
                           setTitle(row.title);
                           setDate(row.date);
                           setAccount(row.account);
-                          setCate(row.cate)
+                          setCate(row.cate);
                           setActiveAccount(row.account);
 
                           if (row.income) {
@@ -387,9 +403,9 @@ function Balances() {
                           <Header as="h4">{row.title}</Header>
                           <span>{row.date} </span>
                           {!activeAccount && (
-                            <Label color="teal">{row.account && row.account.name}</Label>
+                            <Label color="teal">{row.account.name}</Label>
                           )}
-                        {row.cate && <Label>{row.cate}</Label> } 
+                          {row.cate && <Label>{row.cate}</Label>}
                         </Table.Cell>
                         <Table.Cell textAlign="right">
                           {row.income ? (
