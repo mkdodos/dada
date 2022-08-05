@@ -72,19 +72,26 @@ function Balances() {
   // 記錄前3筆帳戶
   const top3Accounts = React.useRef();
 
+  // React.useEffect(() => {}, [currentPage, activeAccount]);
+
   React.useEffect(() => {
+    console.log("use effect");
     // 帳戶資料
     let col = db.collection("accounts");
     if (user) col = col.where("user", "==", user.email);
     // 帳戶筆數
-    col.get().then((snapshot) => {
+    //  col.get().then((snapshot) => {
+
+    // onSnapshot 每次帳戶餘額有變動時,會讀取最新資料
+    col.onSnapshot((snapshot) => {
       totalPages.current = Math.ceil(snapshot.size / rowsPerPage);
       setAccountsTotalRows(snapshot.size);
       const data = snapshot.docs.map((doc, index) => {
         return { ...doc.data(), id: doc.id, index };
       });
       topAccounts.current = data;
-      // setTopAccounts(data.filter(row=>row.index>=0 && row.index<=2));
+      //  setTopAccounts(data)
+      // setTopAccounts(data.filter((row) => row.index >= 0 && row.index <= 2));
       setTopAccounts(
         data.filter(
           (row) =>
@@ -92,11 +99,13 @@ function Balances() {
             row.index < (currentPage + 1) * rowsPerPage
         )
       );
-      // console.log(snapshot.size);
+          // 設定最新的帳戶餘額
+      if (activeAccount)
+        setActiveBalance(
+          data.filter((account) => account.id == activeAccount.id)[0].balance
+        );
+      
     });
-  }, [currentPage]);
-
-  React.useEffect(() => {
     // 類別資料
     let colCates = db.collection("cates").orderBy("prior");
     if (user) colCates = colCates.where("user", "==", user.email);
@@ -121,15 +130,15 @@ function Balances() {
       });
       setBalances(data);
     });
-  }, [activeAccount]);
+  }, [activeAccount, currentPage]);
 
   function saveRow() {
     setIsLoding(true);
     let row = {
       title,
       date,
-      cate,
     };
+    if (cate) row.cate = cate;
     if (isIncome == "income") {
       row.income = income;
     } else {
@@ -336,13 +345,10 @@ function Balances() {
                 onClick={() => {
                   setCurrentPage(currentPage + 1);
                   // 最後一頁
-                  if (currentPage == totalPages.current-1) {
+                  if (currentPage == totalPages.current - 1) {
                     setCurrentPage(0);
                   }
-                  // console.log(currentPage)
-                  // console.log(totalPages)
-
-                  // setCurrentPage(1)
+                 
                 }}
               >
                 <Statistic horizontal>
