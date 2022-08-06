@@ -33,7 +33,7 @@ export default function Accounts() {
 
   React.useEffect(() => {
     let col = db.collection("accounts");
-    // col.orderBy("prior");
+    col=col.orderBy("prior");
     if (user) col = col.where("user", "==", user.email);
     // col=col.where("name","==","晚")
     col = col.onSnapshot((snapshot) => {

@@ -192,7 +192,7 @@ function Posts() {
                     textAlign="center"
                     onClick={() => {
                       setActiveItem(row.name);
-                      setActiveBalance(row.balance);
+                      setActiveBalance(row.balance+700);
                     }}
                     color="teal"
                     inverted={activeItem === row.name}

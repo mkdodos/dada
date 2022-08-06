@@ -77,7 +77,7 @@ function Balances() {
   React.useEffect(() => {
     console.log("use effect");
     // 帳戶資料
-    let col = db.collection("accounts");
+    let col = db.collection("accounts").orderBy('prior');
     if (user) col = col.where("user", "==", user.email);
     // 帳戶筆數
     //  col.get().then((snapshot) => {

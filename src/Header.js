@@ -1,5 +1,12 @@
 import React from "react";
-import { Menu, Icon, Image, Dropdown } from "semantic-ui-react";
+import {
+  Menu,
+  Icon,
+  Image,
+  Dropdown,
+  Container,
+  Sticky,
+} from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { auth } from "./utils/firebase";
 import { useHistory } from "react-router-dom";
@@ -50,6 +57,26 @@ function Header() {
         統計
       </Menu.Item>
 
+      {/* <Menu.Item
+            as={Link}
+            to="/dashboard"
+            name="dashboard"
+            onClick={handleClick}
+            active={activeItem === "dashboard"}
+          >
+            股票
+          </Menu.Item>
+
+          <Menu.Item
+            as={Link}
+            to="/dashboard"
+            name="dashboard"
+            onClick={handleClick}
+            active={activeItem === "dashboard"}
+          >
+            記事
+          </Menu.Item> */}
+
       <Dropdown item text="設定">
         <Dropdown.Menu>
           <Dropdown.Item as={Link} to="/user">
@@ -58,7 +85,9 @@ function Header() {
           <Dropdown.Item as={Link} to="/accounts">
             帳戶
           </Dropdown.Item>
-          <Dropdown.Item  as={Link} to="/cates">類別</Dropdown.Item>
+          <Dropdown.Item as={Link} to="/cates">
+            類別
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
 

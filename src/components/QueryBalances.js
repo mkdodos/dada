@@ -120,7 +120,7 @@ export default function QueryBalances() {
           <Table.Row>
             <Table.HeaderCell width={3}>日期</Table.HeaderCell>
             <Table.HeaderCell>項目</Table.HeaderCell>
-            <Table.HeaderCell width={3} textAlign="right">收支</Table.HeaderCell>
+            <Table.HeaderCell width={3} textAlign="center">收支</Table.HeaderCell>
             {/* <Table.HeaderCell>支出</Table.HeaderCell> */}
           </Table.Row>
         </Table.Header>
