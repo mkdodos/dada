@@ -5,13 +5,16 @@ import {
   Statistic,
   Dropdown,
   Placeholder,
+  Button,
 } from "semantic-ui-react";
 import { db, auth } from "../utils/firebase";
 import React from "react";
 import { numFormat } from "../utils/stringFormat";
 import MonthSelect from "./MonthSelect";
 import { MonthButton } from "./MonthSelect";
+import {useHistory} from 'react-router-dom'
 function Dashboard() {
+  const history = useHistory()
   const user = auth.currentUser;
   const [total, setTotal] = React.useState({ income: 0, expense: 0 });
   const [loading, setIsLoding] = React.useState(false);
@@ -38,7 +41,15 @@ function Dashboard() {
   }, [month]);
   return (
     <Container>
+     
       <Grid columns={1}>
+        <Grid.Row>
+          <Grid.Column><Button onClick={()=>{
+            history.push('/transfer')
+
+          }}>轉帳</Button></Grid.Column>
+        
+        </Grid.Row>
         <Grid.Row stretched>
           <Grid.Column textAlign="center">
             <Segment color="teal">

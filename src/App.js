@@ -15,6 +15,7 @@ import QueryBalances from "./components/QueryBalances";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import User from "./components/User";
+import Transfer from "./components/Transfer";
 import { auth } from "./utils/firebase";
 import React from "react";
 
@@ -56,6 +57,7 @@ function App() {
           <Route path="/login" component={Login}></Route>
           <Route path="/user" component={User}></Route>
           <Route path="/posts" component={Posts}></Route>
+          <Route path="/transfer" component={Transfer}></Route>
         </Switch>
       </BrowserRouter>
       {/* <Container>
